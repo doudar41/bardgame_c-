@@ -5,7 +5,6 @@
 #include <vector>
 #include <map>
 #include <ctime> 
-#include <stdlib.h>
 
 #define ARRAY_COUNT(x) (sizeof(*x)/sizeof((*x)[0]))
 
@@ -44,35 +43,42 @@ enum class ScalesEnum {
 };
 
 
-const struct Chords {
+struct Chords {
 
-    std::map<std::string, std::vector<int>> major{  {"MAJOR",{1,5,8}} ,
+    std::map<std::string, std::vector<int>> major{ {"MAJOR",{1,5,8}} ,
                                                     {"MINOR", { 1,4,8 }}
     };
 
 
 };
 
+struct NotesHelder {
 
-const struct Scales {
+    std::vector< std::map<std::string, int> > playersNotes;
 
-    std::vector<int> major = {1,3,5,6,8,10,12};
+};
 
-    public : Scales (){}
 
-    int GetRandomScaleStep(ScalesEnum scale) {
 
-        std::mt19937 mt{};
-        switch (scale) {
+struct Scales {
 
-        case ScalesEnum::MAJOR:
-            mt.seed(std::random_device{}());
-            return major[mt() % major.size()];
-            break;
+    std::vector<int> major = { 1,3,5,6,8,10,12 };
 
-        }
-        return 0;
-    }
+public: Scales() {}
+
+      int GetRandomScaleStep(ScalesEnum scale) {
+
+          std::mt19937 mt{};
+          switch (scale) {
+
+          case ScalesEnum::MAJOR:
+              mt.seed(std::random_device{}());
+              return major[mt() % major.size()];
+              break;
+
+          }
+          return 0;
+      }
 };
 
 struct Note {
@@ -81,210 +87,188 @@ struct Note {
     int length = 1;
     int level = 1;
 
-public: Note(int positionx = 1, int stepx = 1, int lengthx = 1,int levelx = 1)
-        {
-        position = positionx;
-        step = stepx;
-        length = lengthx;
-        level = levelx;
-        }
+public: Note(int positionx = 1, int stepx = 1, int lengthx = 1, int levelx = 1)
+{
+    position = positionx;
+    step = stepx;
+    length = lengthx;
+    level = levelx;
+}
 };
 
 struct Card {
     std::vector<Note> notes;
     int baseDamage;
-   
-    public: Card(std::vector<Note> notesx, int baseDamagex) {
-        
-        baseDamage = baseDamagex;
-        notes = notesx;
-    }
 
-    int AverageNoteLevelInCard() {
-        int level =0;
-        for (Note n : notes) {
-            level += n.level;
-        }
-        level/notes.size();
-    }
+public: Card(std::vector<Note> notesx, int baseDamagex) {
 
+    baseDamage = baseDamagex;
+    notes = notesx;
+}
 
-
+      int AverageNoteLevelInCard() {
+          int level = 0;
+          for (Note n : notes) {
+              level += n.level;
+          }
+          level / notes.size();
+      }
 };
 
 
 class Player
 {
-    public: 
-        std::string name = "Nobody";
-        bool isPlayer = true;
-        int charisma = 4;
-        int agility = 4;
-        int intellect = 4;
-        int luck = 4;
-        int confidence = 100;
-        int stamina = 100;
-        int ignore = 0;
-        int level = 1;
-        enum InstrumentEnum ins = InstrumentEnum::LUTE;
-        BardPower activePowers[10];
-        std::map<std::string, int> notes ;
-        std::vector<Card> cards;
+public:
+    std::string name = "Nobody";
+    bool isPlayer = true;
+    int charisma = 4;
+    int agility = 4;
+    int intellect = 4;
+    int luck = 4;
+    int confidence = 100;
+    int stamina = 100;
+    int ignore = 0;
+    int level = 1;
+    std::map<std::string, int> notes;
+    std::vector<Card> cards;
+    BardPower activePowers[10];
+    enum InstrumentEnum ins = InstrumentEnum::LUTE;
 
+public: Player(std::string namex, bool isPlayerx, int charismax, int agilityx, int intellectx, int luckx) {
+    name = namex;
+    isPlayer = isPlayerx;
+    charisma = charismax;
+    agility = agilityx;
+    intellect = intellectx;
+    luck = luckx;
 
-    public: Player(std::string namex, bool isPlayerx, int charismax, int agilityx, int intellectx, int luckx) {
-        name = namex;
-        isPlayer = isPlayerx;
-        charisma = charismax;
-        agility = agilityx;
-        intellect = intellectx;
-        luck = luckx;
+    confidence = (charisma + level) * 100;
+    stamina = (agility + level) * 100;
+    notes = {};
+}
 
-        confidence = (charisma + level) * 100;
-        stamina = (agility + level) * 100;
-    }
+      int* ReturnAttrubutes(int sigil[]) {
 
-    int* ReturnAttrubutes(int sigil[]) {
-        
-        int att[4] = {0,0,0,0};
+          int att[4] = { 0,0,0,0 };
 
-        //for (int i = 0; i < sizeof(activePowers); i++)
-        //{
-        //    switch (activePowers[i]) {
-        //    case BardPower::INCREASECHARISMA:
-        //        att[0] += 1;
-        //        break;
-        //    case BardPower::INCREASEAGILITY:
-        //        att[1] += 1;
-        //        break;
-        //    case BardPower::INCREASEINTELLECT:
-        //        att[2] += 1;
-        //        break;
-        //    case BardPower::INCREASELUCK:
-        //        att[3] += 1;
-        //        break;
-        //    default:
-        //        break;  
-        //    }
-        //}
+          //for (int i = 0; i < sizeof(activePowers); i++)
+          //{
+          //    switch (activePowers[i]) {
+          //    case BardPower::INCREASECHARISMA:
+          //        att[0] += 1;
+          //        break;
+          //    case BardPower::INCREASEAGILITY:
+          //        att[1] += 1;
+          //        break;
+          //    case BardPower::INCREASEINTELLECT:
+          //        att[2] += 1;
+          //        break;
+          //    case BardPower::INCREASELUCK:
+          //        att[3] += 1;
+          //        break;
+          //    default:
+          //        break;  
+          //    }
+          //}
 
-        switch (ins) {
-            case InstrumentEnum::GUITAR:
-                att[0] += 1;
-                break;
-            case InstrumentEnum::FLUTE:
-                break;
-            case InstrumentEnum::DRUM:
-                break;
-            case InstrumentEnum::TRUMPLET:
-                break;
-            case InstrumentEnum::LUTE:
-                break;
-                    }
+          switch (ins) {
+          case InstrumentEnum::GUITAR:
+              att[0] += 1;
+              break;
+          case InstrumentEnum::FLUTE:
+              break;
+          case InstrumentEnum::DRUM:
+              break;
+          case InstrumentEnum::TRUMPLET:
+              break;
+          case InstrumentEnum::LUTE:
+              break;
+          }
 
-        att[0] = att[0] + charisma + sigil[0];
-        att[1] = att[1] + agility + sigil[1];
-        att[2] = att[2] + intellect + sigil[2];
-        att[3] = att[3] + luck + sigil[3];
+          att[0] = att[0] + charisma + sigil[0];
+          att[1] = att[1] + agility + sigil[1];
+          att[2] = att[2] + intellect + sigil[2];
+          att[3] = att[3] + luck + sigil[3];
 
-        return att;
-    }
+          return att;
+      }
 
-    
+      int DamageConfidence(float amount) {
+          confidence -= amount;
+          if (confidence < 0) {
+              confidence = 0;
+              HandleDeath();
+          }
+          return confidence;
+      }
 
-    int DamageConfidence(float amount) {
-        confidence -= amount;
-        if (confidence < 0) {
-            confidence = 0;
-            HandleDeath();
-        }
-        return confidence;
-    }
+      int HealConfidence(float amount, int sigils[]) {
 
-    int HealConfidence(float amount, int sigils[]) {
+          confidence -= amount;
+          if (confidence > ReturnAttrubutes(sigils)[0]) {
+              confidence = ReturnAttrubutes(sigils)[0];
+          }
+          return confidence;
+      }
 
-        confidence -= amount;
-        if (confidence > ReturnAttrubutes(sigils)[0]) {
-            confidence = ReturnAttrubutes(sigils)[0];
-        }
-        return confidence;
-    }
+      void HandleDeath() {
 
-    void HandleDeath() {
+      }
 
-    }
+      int DamageStamina(float amount) {
+          stamina -= amount;
+          if (stamina < 0) {
+              stamina = 0;
+          }
+          return stamina;
+      }
 
-    int DamageStamina(float amount) {
-        stamina -= amount;
-        if (stamina < 0) {
-            stamina = 0;
-        }
-        return stamina;
-    }
+      void LevelUp(Note note) {
+          std::string nameNote = std::to_string(note.position) + std::to_string(note.step) + std::to_string(note.length);
 
-    std::pair<bool, Note> FindNote(Note note) {
+          notes[nameNote] = notes[nameNote] + 1;
+          std::cout << " player's notes size " << notes.size() << std::endl;
+          std::cout << nameNote << " - " << " note int " << notes[nameNote] << std::endl;
+      }
 
+      int NoteLevel(Note note) {
 
-        return { false, NULL };
-    }
-
-    void AddNote(std::string name) {
-        
-        
-        
-    }
-
-    void LevelUp(Note note) {
-        std::string nameNote = std::string( std::to_string(note.position)) + std::string(std::to_string(note.step)) + std::string(std::to_string(note.length));
-        if (notes.count(nameNote) >0 ) {
-            notes.insert_or_assign(nameNote, notes.find(nameNote)->second+1) ;
-        }
-        else {
-            if (notes.insert({ nameNote, 2 }).second) {
-                std::cout << "add new key " << nameNote << std::endl;
-            }
-        }
-        std::cout << " player's notes  " /*<< notes.size() << notes[name].position<< notes[name].step << notes[name].length*/ << notes.size()<< std::endl;
-    }
-
-    int NoteLevel(Note note) {
-
-        std::string nameNote = std::string(std::to_string(note.position)) + std::string(std::to_string(note.step)) + std::string(std::to_string(note.length));
-         if (notes.find(nameNote) != notes.end()) {
-             return notes.find(nameNote)->second;
-         }
-         else {
-             return 1; // if note isn't found
-         }
-    }
+          std::string nameNote = std::to_string(note.position) + std::to_string(note.step) + std::to_string(note.length);
+          if (notes.find(nameNote) != notes.end()) {
+              return notes.find(nameNote)->second;
+          }
+          else {
+              return 1; // if note isn't found
+          }
+      }
 };
 
 class Party {
 
-    public: int sigils[4] = {0,0,0,0};
-    public: std::vector<Player> players;
+public: int sigils[4] = { 0,0,0,0 };
+public: std::vector<Player> players;
 
-    public: Party() {}
+public: Party() {}
 
 
-    std::vector<Player> BardOrder(Player enemy) {
+      std::vector<Player> BardOrder(Player enemy) {
 
-        std::vector<Player> battleorder;
-      /*  int count = 0;
-        std::vector<Player> allBattleMembers;
-        //allBattleMembers.emplace_back(players);
-        allBattleMembers.emplace_back(enemy);
-        std::cout << " all members " << allBattleMembers.size();
-        */
+          std::vector<Player> battleorder;
+          /*  int count = 0;
+            std::vector<Player> allBattleMembers;
+            //allBattleMembers.emplace_back(players);
+            allBattleMembers.emplace_back(enemy);
+            std::cout << " all members " << allBattleMembers.size();
+            */
 
-        return battleorder;
-    }
+          return battleorder;
+      }
 };
 
 int DiceBasedOnLuck(int luck) {
     if (luck < 1)
     {
-        std::cout << "luck can't be less than 1"<< std::endl;
+        std::cout << "luck can't be less than 1" << std::endl;
         luck = 4;
     }
     int dice = 0;
@@ -320,20 +304,44 @@ int DiceBasedOnLuck(int luck) {
 
 }
 
+void LevelUp(Note note, std::map<std::string, int> noteLevel) {
+    std::string nameNote = std::to_string(note.position) + std::to_string(note.step) + std::to_string(note.length);
+
+    if (noteLevel.contains(nameNote)) {
+        noteLevel[std::string(nameNote)] = noteLevel.find(nameNote)->second + 1;
+        std::cout << " level up note  " << std::endl;
+    }
+    else {
+        noteLevel[std::string(nameNote)] = 2;
+        std::cout << " add new notes  " << std::endl;
+    }
+    std::cout << " player's notes  " << noteLevel.size() << std::endl;
+}
+
+int NoteLevel(Note note, std::map<std::string, int> noteLevel) {
+
+    std::string nameNote = std::to_string(note.position) + std::to_string(note.step) + std::to_string(note.length);
+    if (noteLevel.find(nameNote) != noteLevel.end()) {
+        return noteLevel.find(nameNote)->second;
+    }
+    else {
+        return 1; // if note isn't found
+    }
+}
 // Core function 
 int CalculateLuck(int luck)
 {
     int returnLuck = 0;
 
     returnLuck = (std::rand() % DiceBasedOnLuck(luck)) + 1;
-   // std::cout << returnLuck << std::endl;
+    // std::cout << returnLuck << std::endl;
 
     return returnLuck;
 }
 
 void NoteLevelUp(Player player, Note note) {
     player.LevelUp(note);
-    std::cout << player.name << "'s" << " note "<<  note.position<< "-" << note.step << "-" << note.length << "- is leveled up by level " << player.NoteLevel(note)<< std::endl;
+    std::cout << player.name << "'s" << " note " << note.position << "-" << note.step << "-" << note.length << "- is leveled up by level " << player.NoteLevel(note) << std::endl;
 }
 
 std::vector<Note> FindAChord(std::vector<Note> notes) {
@@ -354,17 +362,17 @@ float DamageCalculation(Player player, int cardBaseDamage, Note note, int sigils
     if (player.stamina > 0) {
         int luckResult = CalculateLuck(player.ReturnAttrubutes(sigils)[3]);
         int dice = DiceBasedOnLuck(player.ReturnAttrubutes(sigils)[3]);
-        float damageDiceDivision = (1.0/ (float)dice) * noteDamageRounded;
+        float damageDiceDivision = (1.0 / (float)dice) * noteDamageRounded;
         float damageLuckResult = damageDiceDivision * luckResult;
         damage = (float)damageLuckResult + ((player.ReturnAttrubutes(sigils)[0]) * 0.3);
-        if (luckResult < 3) {
+        if (luckResult < 3 && player.isPlayer) {
+
+            player.LevelUp(note);
             
-            NoteLevelUp(player, note);
         }
         std::cout << player.name << "'s luck result - " << luckResult << std::endl;
-
     }
-    else 
+    else
     {
         damage = (float)noteDamageRounded * 0.5;
     }
@@ -377,12 +385,12 @@ float DamageCalculation(Player player, int cardBaseDamage, Note note, int sigils
 Card cardMaker(std::vector<Note> notesMap, int baseDamage, int min, int max, ScalesEnum scale) {
     std::vector<Note> notes;
     std::mt19937 mt{};
-    
+
     int barRange = 0;
     Scales scale_source = Scales();
 
-   while (barRange < 32) {
-        
+    while (barRange < 32) {
+
         if (!notes.empty()) {
             mt.seed(std::random_device{}());
             int r = mt();
@@ -391,7 +399,7 @@ Card cardMaker(std::vector<Note> notesMap, int baseDamage, int min, int max, Sca
             if (n.length >= min && n.length <= max) {
                 if (n.position == barRange && 32 / n.length <= (32 - barRange)) notes.push_back(n);
             }
-            
+
         }
 
         if (notes.empty()) {
@@ -402,19 +410,21 @@ Card cardMaker(std::vector<Note> notesMap, int baseDamage, int min, int max, Sca
             if (n.length >= min && n.length <= max) {
                 if (n.position == 1) notes.push_back(n);
             }
-         }
+        }
         if (!notes.empty()) {
             barRange = 0;
             for (Note n : notes) {
                 barRange += (32 / n.length);
             }
         }
-        
+
     }
     //std::cout << "Notes bar: " << barRange;
-    Card card =  Card(notes, baseDamage);
+    Card card = Card(notes, baseDamage);
     return card;
 }
+
+
 
 
 int main(int argc, char const* argv[])
@@ -428,7 +438,7 @@ int main(int argc, char const* argv[])
     for (int pos = 1; pos < 33; pos++) {
         for (int length = 1; length < 16; length++) {
             if (length == 1 || length == 2 || length == 4 || length == 8 || length == 16) {
-                if((32/length)<=32-pos){
+                if ((32 / length) <= 32 - pos) {
                     Note note = Note(pos, 1, length, 1);
                     notes.push_back(note);
                 }
@@ -440,42 +450,44 @@ int main(int argc, char const* argv[])
 
 
     //Initializing players
-    Player Player1 = Player("Garry",true, 6, 5, 5, 6);
+    Player Player1 = Player("Garry", true, 6, 5, 5, 6);
     for (int i = 0; i < 2; i++) {
-        Player1.cards.push_back(cardMaker(notes, 8, 1, 4,ScalesEnum::MAJOR));
+        Player1.cards.push_back(cardMaker(notes, 8, 1, 4, ScalesEnum::MAJOR));
     }
-    
+
+    std::map<std::string, int> noteLevelPLayer1;
+
     Player Player2 = Player("Ami", true, 10, 4, 5, 4);
     for (int i = 0; i < 2; i++) {
         Player2.cards.push_back(cardMaker(notes, 8, 1, 4, ScalesEnum::MAJOR));
     }
+    std::map<std::string, int> noteLevelPLayer2;
 
     std::vector<Player> players;
     players.emplace_back(Player1);
     players.emplace_back(Player2);
+
 
     Player enemy = Player("Enemy", false, 8, 4, 6, 7);
     for (int i = 0; i < 4; i++) {
         enemy.cards.push_back(cardMaker(notes, 8, 1, 4, ScalesEnum::MAJOR));
     }
     players.emplace_back(enemy);
+    std::map<std::string, int> noteLevelEnemy;
+
+    NotesHelder notesHolder;
+    notesHolder.playersNotes = { noteLevelPLayer1, noteLevelPLayer2, noteLevelEnemy };
 
 
-   
     int sigils[4] = { 1,0,0,0 };
 
-    std::cout << " player's notes  " << players[0].notes.size() << std::endl;
-    
-
-    std::map <std::string, int> test = { {"123",5}, {"132",7} };
-    std::string testStr = std::string("1") + std::string("2")  + std::string("3");
-    std::cout << " outcome " << test.find(testStr)->second << std::endl;
-    if (test.find(testStr) != test.end()) { std::cout << " key found \n"; }
-
-    test.insert_or_assign( test.find(testStr)->first, 50)  ;
-    std::cout << " outcome " << test.find(testStr)->second << std::endl;
-
-
+    //std::cout << " player's notes  " << players[0].notes.size() << std::endl;
+    //players[0].LevelUp(Note(1, 1, 1, 1));
+    //players[0].LevelUp(Note(2, 2, 2, 2));
+    //players[0].LevelUp(Note(2, 2, 2, 2));
+    //for (auto n : players[0].notes) {
+    //    std::cout << " loop through notes" << n.second << std::endl;
+    //}
 
 
     while (true)
