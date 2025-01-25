@@ -1,10 +1,12 @@
 
+#include <conio.h> 
 #include <iostream>
 #include <random>
 #include <string>
 #include <vector>
 #include <map>
 #include <ctime> 
+
 
 #define ARRAY_COUNT(x) (sizeof(*x)/sizeof((*x)[0]))
 
@@ -52,11 +54,6 @@ struct Chords {
 
 };
 
-struct NotesHelder {
-
-    std::vector< std::map<std::string, int> > playersNotes;
-
-};
 
 
 
@@ -64,21 +61,21 @@ struct Scales {
 
     std::vector<int> major = { 1,3,5,6,8,10,12 };
 
-public: Scales() {}
+    Scales() {}
 
-      int GetRandomScaleStep(ScalesEnum scale) {
+    int GetRandomScaleStep(ScalesEnum scale) {
 
-          std::mt19937 mt{};
-          switch (scale) {
+        std::mt19937 mt{};
+        switch (scale) {
 
-          case ScalesEnum::MAJOR:
-              mt.seed(std::random_device{}());
-              return major[mt() % major.size()];
-              break;
+        case ScalesEnum::MAJOR:
+            mt.seed(std::random_device{}());
+            return major[mt() % major.size()];
+            break;
 
-          }
-          return 0;
-      }
+        }
+        return 0;
+    }
 };
 
 struct Note {
@@ -87,32 +84,32 @@ struct Note {
     int length = 1;
     int level = 1;
 
-public: Note(int positionx = 1, int stepx = 1, int lengthx = 1, int levelx = 1)
-{
-    position = positionx;
-    step = stepx;
-    length = lengthx;
-    level = levelx;
-}
+    Note(int positionx = 1, int stepx = 1, int lengthx = 1, int levelx = 1)
+    {
+        position = positionx;
+        step = stepx;
+        length = lengthx;
+        level = levelx;
+    }
 };
 
 struct Card {
     std::vector<Note> notes;
     int baseDamage;
 
-public: Card(std::vector<Note> notesx, int baseDamagex) {
+    Card(std::vector<Note> notesx, int baseDamagex) {
 
-    baseDamage = baseDamagex;
-    notes = notesx;
-}
+        baseDamage = baseDamagex;
+        notes = notesx;
+    }
 
-      int AverageNoteLevelInCard() {
-          int level = 0;
-          for (Note n : notes) {
-              level += n.level;
-          }
-          level / notes.size();
-      }
+    int AverageNoteLevelInCard() {
+        int level = 0;
+        for (Note n : notes) {
+            level += n.level;
+        }
+        level / notes.size();
+    }
 };
 
 
@@ -130,6 +127,9 @@ public:
     int ignore = 0;
     int level = 1;
     std::map<std::string, int> notes;
+    std::vector<std::string> indexes = {};
+    std::vector<int> levels = {};
+
     std::vector<Card> cards;
     BardPower activePowers[10];
     enum InstrumentEnum ins = InstrumentEnum::LUTE;
@@ -146,6 +146,7 @@ public: Player(std::string namex, bool isPlayerx, int charismax, int agilityx, i
     stamina = (agility + level) * 100;
     notes = {};
 }
+      Player() {};
 
       int* ReturnAttrubutes(int sigil[]) {
 
@@ -193,6 +194,15 @@ public: Player(std::string namex, bool isPlayerx, int charismax, int agilityx, i
           return att;
       }
 
+
+      int ReturnMaxConfidence(int sigils[]) {
+
+          return (ReturnAttrubutes(sigils)[0] + level) * 100;
+
+      }
+
+
+
       int DamageConfidence(float amount) {
           confidence -= amount;
           if (confidence < 0) {
@@ -225,17 +235,32 @@ public: Player(std::string namex, bool isPlayerx, int charismax, int agilityx, i
 
       void LevelUp(Note note) {
           std::string nameNote = std::to_string(note.position) + std::to_string(note.step) + std::to_string(note.length);
+          bool found = false;
 
-          notes[nameNote] = notes[nameNote] + 1;
+          for (auto n : notes) {
+              std::cout << "note found " << n.first << " - " << " note level " << n.second << std::endl;
+              if (nameNote == n.first) {
+                  found = true;
+              }
+          }
+          if (!found) notes[nameNote] = 2;
+          else {
+              int t = notes[nameNote];
+              auto n = notes.erase(nameNote);
+              notes[nameNote] = t + 1;
+              std::cout << "note check " << nameNote << " - " << " note level " << notes[nameNote] << " - " << t << std::endl;
+          }
+
+
           std::cout << " player's notes size " << notes.size() << std::endl;
-          std::cout << nameNote << " - " << " note int " << notes[nameNote] << std::endl;
+          std::cout << nameNote << " - " << " note level " << notes[nameNote] << std::endl;
       }
 
       int NoteLevel(Note note) {
 
           std::string nameNote = std::to_string(note.position) + std::to_string(note.step) + std::to_string(note.length);
-          if (notes.find(nameNote) != notes.end()) {
-              return notes.find(nameNote)->second;
+          if (notes.contains(nameNote)) {
+              return notes[nameNote];
           }
           else {
               return 1; // if note isn't found
@@ -251,18 +276,6 @@ public: std::vector<Player> players;
 public: Party() {}
 
 
-      std::vector<Player> BardOrder(Player enemy) {
-
-          std::vector<Player> battleorder;
-          /*  int count = 0;
-            std::vector<Player> allBattleMembers;
-            //allBattleMembers.emplace_back(players);
-            allBattleMembers.emplace_back(enemy);
-            std::cout << " all members " << allBattleMembers.size();
-            */
-
-          return battleorder;
-      }
 };
 
 int DiceBasedOnLuck(int luck) {
@@ -304,30 +317,6 @@ int DiceBasedOnLuck(int luck) {
 
 }
 
-void LevelUp(Note note, std::map<std::string, int> noteLevel) {
-    std::string nameNote = std::to_string(note.position) + std::to_string(note.step) + std::to_string(note.length);
-
-    if (noteLevel.contains(nameNote)) {
-        noteLevel[std::string(nameNote)] = noteLevel.find(nameNote)->second + 1;
-        std::cout << " level up note  " << std::endl;
-    }
-    else {
-        noteLevel[std::string(nameNote)] = 2;
-        std::cout << " add new notes  " << std::endl;
-    }
-    std::cout << " player's notes  " << noteLevel.size() << std::endl;
-}
-
-int NoteLevel(Note note, std::map<std::string, int> noteLevel) {
-
-    std::string nameNote = std::to_string(note.position) + std::to_string(note.step) + std::to_string(note.length);
-    if (noteLevel.find(nameNote) != noteLevel.end()) {
-        return noteLevel.find(nameNote)->second;
-    }
-    else {
-        return 1; // if note isn't found
-    }
-}
 // Core function 
 int CalculateLuck(int luck)
 {
@@ -339,10 +328,6 @@ int CalculateLuck(int luck)
     return returnLuck;
 }
 
-void NoteLevelUp(Player player, Note note) {
-    player.LevelUp(note);
-    std::cout << player.name << "'s" << " note " << note.position << "-" << note.step << "-" << note.length << "- is leveled up by level " << player.NoteLevel(note) << std::endl;
-}
 
 std::vector<Note> FindAChord(std::vector<Note> notes) {
     Chords chord = Chords();
@@ -354,30 +339,49 @@ std::vector<Note> FindAChord(std::vector<Note> notes) {
     return c;
 }
 
+struct BattleReport {
 
-float DamageCalculation(Player player, int cardBaseDamage, Note note, int sigils[])
+    std::vector<Note> playedNotes;
+    std::vector<Note> leveledUpNotes;
+    std::vector<float> damageAmounts;
+public:
+    Player Attacker;
+    Player Opponent;
+
+    BattleReport() {}
+
+    void ClearReport() {
+
+        playedNotes.clear();
+        damageAmounts.clear();
+        Attacker = Player();
+        Opponent = Player();
+        leveledUpNotes.clear();
+    }
+};
+
+float DamageCalculation(Player* player, int cardBaseDamage, Note note, int sigils[], BattleReport* report)
 {
+    int luckResult = 0;
     float damage = 0;
-    int noteDamageRounded = (cardBaseDamage / note.length) * player.NoteLevel(note);
-    if (player.stamina > 0) {
-        int luckResult = CalculateLuck(player.ReturnAttrubutes(sigils)[3]);
-        int dice = DiceBasedOnLuck(player.ReturnAttrubutes(sigils)[3]);
+    int noteDamageRounded = (cardBaseDamage / note.length) * player->NoteLevel(note);
+
+    if (player->stamina > 0) {
+        luckResult = CalculateLuck(player->ReturnAttrubutes(sigils)[3]);
+        int dice = DiceBasedOnLuck(player->ReturnAttrubutes(sigils)[3]);
         float damageDiceDivision = (1.0 / (float)dice) * noteDamageRounded;
         float damageLuckResult = damageDiceDivision * luckResult;
-        damage = (float)damageLuckResult + ((player.ReturnAttrubutes(sigils)[0]) * 0.3);
-        if (luckResult < 3 && player.isPlayer) {
-
-            player.LevelUp(note);
-            
-        }
-        std::cout << player.name << "'s luck result - " << luckResult << std::endl;
+        damage = (float)damageLuckResult + ((player->ReturnAttrubutes(sigils)[0]) * 0.3);
     }
     else
     {
         damage = (float)noteDamageRounded * 0.5;
     }
-    player.DamageStamina(damage);
+    player->DamageStamina(damage);
+    if (luckResult < 3) { player->LevelUp(note); report->leveledUpNotes.emplace_back(note); }
 
+
+    //std::cout << player.name << "'s luck result - " << luckResult << std::endl;
     return damage;
 }
 
@@ -424,8 +428,32 @@ Card cardMaker(std::vector<Note> notesMap, int baseDamage, int min, int max, Sca
     return card;
 }
 
+int ShowConfidence(Player* player, int sigils[]) {
+
+    //std::cout << player->confidence << "/" << player->ReturnMaxConfidence(sigils) << " ";
+    return (((float)player->confidence / (float)player->ReturnMaxConfidence(sigils)) * 50);
+}
 
 
+
+void ShowBattleReport(BattleReport *report) {
+
+    int count = 0;
+    for (Note note : report->playedNotes) {
+    std::cout << "Note position: " << note.position << " step: " << note.step << " length: " << note.length  << std::endl;
+    std::cout << report->Attacker.name << " damages " << report->Opponent.name << " amount " <<report->damageAmounts[count] << ", stamina left " << report->Attacker.stamina << std::endl;
+    
+    count++;
+    }
+    if (!report->playedNotes.empty())std::cout << "\n  Notes level progression \n \n";
+
+    for (Note note : report->leveledUpNotes) {
+        std::cout << "Note position: " << note.position <<  " step: " << note.step << " length: " << note.length << " Leveled Up" << std::endl;
+    }
+
+}
+
+void Clear() { std::cout << "\x1B[2J\x1B[H"; }
 
 int main(int argc, char const* argv[])
 {
@@ -455,87 +483,87 @@ int main(int argc, char const* argv[])
         Player1.cards.push_back(cardMaker(notes, 8, 1, 4, ScalesEnum::MAJOR));
     }
 
-    std::map<std::string, int> noteLevelPLayer1;
-
     Player Player2 = Player("Ami", true, 10, 4, 5, 4);
     for (int i = 0; i < 2; i++) {
         Player2.cards.push_back(cardMaker(notes, 8, 1, 4, ScalesEnum::MAJOR));
     }
-    std::map<std::string, int> noteLevelPLayer2;
 
-    std::vector<Player> players;
-    players.emplace_back(Player1);
-    players.emplace_back(Player2);
-
+    std::vector<Player*> players;
+    players.emplace_back(&Player1);
+    players.emplace_back(&Player2);
 
     Player enemy = Player("Enemy", false, 8, 4, 6, 7);
     for (int i = 0; i < 4; i++) {
         enemy.cards.push_back(cardMaker(notes, 8, 1, 4, ScalesEnum::MAJOR));
     }
-    players.emplace_back(enemy);
-    std::map<std::string, int> noteLevelEnemy;
-
-    NotesHelder notesHolder;
-    notesHolder.playersNotes = { noteLevelPLayer1, noteLevelPLayer2, noteLevelEnemy };
+    players.emplace_back(&enemy);
 
 
-    int sigils[4] = { 1,0,0,0 };
+    int sigils[4] = { 1,1,1,1 };
 
-    //std::cout << " player's notes  " << players[0].notes.size() << std::endl;
-    //players[0].LevelUp(Note(1, 1, 1, 1));
-    //players[0].LevelUp(Note(2, 2, 2, 2));
-    //players[0].LevelUp(Note(2, 2, 2, 2));
-    //for (auto n : players[0].notes) {
-    //    std::cout << " loop through notes" << n.second << std::endl;
-    //}
-
+    BattleReport battleReport = BattleReport();
 
     while (true)
     {
+        Clear();
         int n = 0, c = 0;
         for (int i = 1; i <= players.size(); i++) {
-            std::cout << i << ". " << players[i - 1].name << " // ";
+
+
+            std::cout << i << ". " << players[i - 1]->name ;
+            int count = players[i - 1]->name.size();
+            if (count < 15) {
+                count = (15 - count); 
+                while (count > 0) { std::cout << " "; count--; }
+            }
+            
+            int slashes = ShowConfidence(players[i - 1], sigils)+1;
+            while (slashes > 0) { std::cout << "/"; slashes--; }
+            std::cout << std::endl;
         }
+        ShowBattleReport(&battleReport);
         std::cout << "Choose player ";
         std::cin >> n;
         n -= 1;
-        if (players[n].isPlayer) {
-            std::cout << "Player has " << players[n].cards.size() << " cards \n";
+        battleReport.ClearReport();
+        if (players[n]->isPlayer) {
+            std::cout << "Player has " << players[n]->cards.size() << " cards \n";
             std::cout << "Choose card ";
             std::cin >> c;
             float damage = 0;
-            for (Note note : players[n].cards[c].notes) {
-                damage += DamageCalculation(players[n], players[n].cards[c].baseDamage, note, sigils);
-                enemy.DamageConfidence(damage);
-                players[n].DamageStamina(damage * 0.5);
-                std::cout << "Note position: " << note.position << " length: " << note.length << " step: " << note.step << std::endl;
-                std::cout << players[n].name << " damages " << enemy.name << " on " << damage << " amount " << ", stamina left " << players[n].stamina << std::endl;
-                std::cout << "Opponent confidence is " << enemy.confidence << std::endl;
-                //std::cout << "check stamina is change" << players[n].stamina << std::endl;
-                //std::system("pause");
+            battleReport.Attacker = *players[n];
+            battleReport.Opponent = *players[2];
+            for (Note note : players[n]->cards[c].notes) {
+                damage += DamageCalculation(players[n], players[n]->cards[c].baseDamage, note, sigils, &battleReport);
+                players[2]->DamageConfidence(damage);
+                players[n]->DamageStamina(damage * 0.5);
+                battleReport.playedNotes.emplace_back(note);
+                battleReport.damageAmounts.emplace_back(damage);
+
             }
         }
         else {
             //auto attack of a enemy
             mt.seed(std::random_device{}());
             int r = mt();
-            int ran = r % players[n].cards.size();
+            int ran = r % players[n]->cards.size();
 
             mt.seed(std::random_device{}());
-            int rndPlayer = mt() % players[n].cards.size();
+            int rndPlayer = mt() % players.size();
 
 
             float damage = 0;
-            for (Note note : players[n].cards[ran].notes) {
-                damage += DamageCalculation(players[n], players[n].cards[ran].baseDamage, note, sigils);
-                players[rndPlayer].DamageConfidence(damage);
-                players[n].DamageStamina(damage * 0.5);
-                std::cout << "Note position: " << note.position << " length: " << note.length << " step: " << note.step << std::endl;
-                std::cout << players[n].name << " damages " << enemy.name << " on " << damage << " amount " << ", stamina left " << players[n].stamina << std::endl;
-                std::cout << "Opponent confidence is " << enemy.confidence << std::endl;
-                //std::cout << "check stamina is change" << players[n].stamina << std::endl;
-                //std::system("pause");
+            if (rndPlayer != n) {
+
+                for (Note note : players[n]->cards[ran].notes) {
+                    damage += DamageCalculation(players[n], players[n]->cards[ran].baseDamage, note, sigils, &battleReport);
+                    players[rndPlayer]->DamageConfidence(damage);
+                    players[n]->DamageStamina(damage * 0.5);
+
+                }
+
             }
+
         }
     }
     return 0;
